@@ -1,15 +1,29 @@
+var fs = require('fs');
+var system = require('system');
+var args = system.args;
+
+var writeToFile = system.args[1];
+
 var page = require('webpage').create();
-var url = 'http://mihirkumar.com';
+var url = 'http://www.mihirkumar.com';
 
 page.open(url, function(status) {
-    page.includeJs("https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js", function() {
-        console.log(page.evaluate(function() {
-            return $('a')
-                .map(function() {
-                    return this.href;})
-                .get();
-                .join();
-        }));
-        phantom.exit()
+
+    var links = page.evaluate(function() {
+        var anchorElements = document.getElementsByTagName('a');
+
+        var index = 0;
+        var linkArray = Array();
+        
+        for (i = 0; i < anchorElements.length; i++)
+            linkArray.push(anchorElements[i].getAttribute('href'));
+        
+        return linkArray;
     });
+
+    //Possible optimization by taking care of this in the for loop
+    linkArray = links.join('\n');
+
+    fs.write(writeToFile, linkArray, 'w');
+    phantom.exit();
 });
